@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 
 	webpush "github.com/SherClockHolmes/webpush-go"
 	"github.com/labstack/echo/v4"
@@ -71,6 +73,12 @@ func pushNotification(cfg types.Config, db *gorm.DB) echo.HandlerFunc {
 		var users []types.User
 		if err := db.Preload("PushSubscriptions").Find(&users).Error; err != nil {
 			return errors.Wrap(err, "finding users by topic")
+		}
+
+		for _, i := range []string{"fail", "success", "good", "bad", "neutral", "mid"} {
+			if strings.HasPrefix(strings.ToLower(icon), i) {
+				icon = fmt.Sprintf("https://%s/static/%s.png", cfg.Hostname, i)
+			}
 		}
 
 		for _, user := range users {
