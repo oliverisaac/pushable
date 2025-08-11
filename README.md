@@ -21,3 +21,4 @@ If any field is not defined then it will default to an empty string.
 - htmx
 - golang
 - javascript
+- templ
