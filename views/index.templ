@@ -5,14 +5,7 @@ import "github.com/oliverisaac/pushable/types"
 templ Index(pageData types.HomePageData) {
 @Layout(pageData.Config, pageData.User, "Pushable") {
 <section class="container mx-auto">
-	if pageData.User != nil && pageData.User.ID > 0 {
-	@CreateNoteForm(types.Note{}, "random", pageData.Prompt, nil)
-	}
-	<div id="notes" class="mt-4 space-y-4">
-		for _, note := range pageData.Notes {
-		@Note(note)
-		}
-	</div>
+		<h1>Welcome to Pushable</h1>
 </section>
 }
 }

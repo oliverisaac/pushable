@@ -100,30 +100,12 @@ func Layout(cfg types.Config, user *types.User, title string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if user != nil {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button id=\"push-subscribe-button\" class=\"flex items-center px-4 py-2 text-white rounded-md bg-blue-600 hover:bg-blue-700\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = notificationBellSVG("h-3 w-3").Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"ml-2\">Notify Me</span></button> ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button id=\"push-subscribe-button\" class=\"flex items-center px-4 py-2 text-white rounded-md bg-blue-600 hover:bg-blue-700\"><span class=\"ml-2\">Notify Me</span></button> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(user.PushSubscriptions) > 0 {
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button hx-confirm=\"Unsubscribe all devices from push notifications?\" hx-post=\"/push/unsubscribe\" hx-swap=\"delete\" id=\"push-unsubscribe-button\" class=\"px-4 py-2 text-white rounded-md bg-red-800 hover:bg-red-800\">Do Not Notify Me</button>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if user.Role == "admin" {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button hx-post=\"/push/trigger\" id=\"push-trigger-button\" class=\"px-4 py-2 text-white rounded-md bg-yellow-600 hover:bg-yellow-800\">Trigger Notification</button>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -136,7 +118,7 @@ func Layout(cfg types.Config, user *types.User, title string) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(version.Tag)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 88, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 82, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

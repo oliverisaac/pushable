@@ -44,8 +44,11 @@ cert.pem: cert.key
 .PHONY: certs
 certs: cert.key cert.pem
 
+.env:
+	touch .env
+
 .PHONY: dev certs
-dev: docker-build
+dev: .env docker-build
 	air
 
 .PHONY: build

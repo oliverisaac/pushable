@@ -12,7 +12,6 @@ type User struct {
 	Email             string
 	Password          string
 	Role              string
-	Notes             []Note
 	PushSubscriptions []PushSubscription
 	CreatedAt         time.Time  `gorm:"autoCreateTime"`
 	UpdatedAt         *time.Time `gorm:"autoUpdateTime"`

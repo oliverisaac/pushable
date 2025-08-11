@@ -68,7 +68,7 @@ templ Layout(cfg types.Config, user *types.User, title string) {
 			if user != nil {
 			<button id="push-subscribe-button"
 				class="flex items-center px-4 py-2 text-white rounded-md bg-blue-600 hover:bg-blue-700">
-				@notificationBellSVG("h-3 w-3") <span class="ml-2">Notify Me</span>
+				<span class="ml-2">Notify Me</span>
 			</button>
 			if len(user.PushSubscriptions) > 0 {
 			<button hx-confirm="Unsubscribe all devices from push notifications?" hx-post="/push/unsubscribe"
@@ -77,15 +77,9 @@ templ Layout(cfg types.Config, user *types.User, title string) {
 				Do Not Notify Me
 			</button>
 			}
-			if user.Role == "admin" {
-			<button hx-post="/push/trigger" id="push-trigger-button"
-				class="px-4 py-2 text-white rounded-md bg-yellow-600 hover:bg-yellow-800">
-				Trigger Notification
-			</button>
-			}
 			}
 		</div>
-		<p class="text-center text-neutral-500 text-xs mt-2">Version: {version.Tag}</p>
+		<p class="text-center text-neutral-500 text-xs mt-2">Version: { version.Tag }</p>
 	</footer>
 	<script type="text/javascript">
 		document.addEventListener("DOMContentLoaded", (event) => {
