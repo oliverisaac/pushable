@@ -1,0 +1,174 @@
+package views
+
+import (
+"github.com/oliverisaac/pushable/types"
+"github.com/oliverisaac/pushable/version"
+"fmt"
+)
+
+func versionedPath(path string) string {
+return fmt.Sprintf("%s?version=%s", path, version.Tag)
+}
+
+templ Layout(cfg types.Config, user *types.User, title string) {
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>{ title }</title>
+	<meta name="description"
+		content="A command line tool that helps you build and test web app ideas blazingly-fast with a streamlined Go, HTMX, and SQLite stack. Authored by Damien Sedgwick." />
+	<link href={ versionedPath("/static/css/style.min.css") } rel="stylesheet" />
+	<link rel="icon" href="/static/icon-128.png" type="image/png" />
+	<script src="/static/htmx-2.0.6.min.js"></script>
+
+	<link rel="manifest" href={ versionedPath("/static/manifest.json") } />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="application-name" content="Pushable" />
+	<meta name="apple-mobile-web-app-title" content="Pushable" />
+	<!--
+    <meta name="theme-color" content="#2c3e50"/> 
+    <meta name="msapplication-navbutton-color" content="#2c3e50"/>
+    -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<link rel="icon" type="image/png" href="/static/icon-512.png" />
+	<link rel="apple-touch-icon" href="/static/icon-512.png" />
+</head>
+
+<body id="body" class="bg-neutral-900 text-neutral-100 flex flex-col min-h-screen">
+	<header class="bg-neutral-800">
+		<nav class="container flex items-center justify-between p-4 mx-auto">
+			<a href="/" title="Napp Home" class="flex items-center space-x-2">
+				<img src="/static/icon-512.png" class="h-10 w-10" alt="Icon" />
+				<span class="text-4xl font-bold">Pushable</span>
+			</a>
+			<ul class="flex items-center space-x-4">
+				if user != nil {
+				<li>
+					<button hx-post="/auth/sign-out" hx-target="body"
+						class="px-4 py-2 text-white rounded-md bg-gray-600 hover:bg-gray-700">Sign Out</button>
+				</li>
+				} else {
+				<li>
+					<button hx-get="/auth/sign-in" hx-target="body"
+						class="px-4 py-2 text-white rounded-md bg-primary-600 hover:bg-primary-700">Sign In</button>
+				</li>
+				}
+			</ul>
+		</nav>
+	</header>
+	<main class="container p-4 mx-auto flex-grow">
+		{ children... }
+	</main>
+	<footer class="p-4">
+		<div class="flex justify-center items-center space-x-2">
+			if user != nil {
+			<button id="push-subscribe-button"
+				class="flex items-center px-4 py-2 text-white rounded-md bg-blue-600 hover:bg-blue-700">
+				@notificationBellSVG("h-3 w-3") <span class="ml-2">Notify Me</span>
+			</button>
+			if len(user.PushSubscriptions) > 0 {
+			<button hx-confirm="Unsubscribe all devices from push notifications?" hx-post="/push/unsubscribe"
+				hx-swap="delete" id="push-unsubscribe-button"
+				class="px-4 py-2 text-white rounded-md bg-red-800 hover:bg-red-800">
+				Do Not Notify Me
+			</button>
+			}
+			if user.Role == "admin" {
+			<button hx-post="/push/trigger" id="push-trigger-button"
+				class="px-4 py-2 text-white rounded-md bg-yellow-600 hover:bg-yellow-800">
+				Trigger Notification
+			</button>
+			}
+			}
+		</div>
+		<p class="text-center text-neutral-500 text-xs mt-2">Version: {version.Tag}</p>
+	</footer>
+	<script type="text/javascript">
+		document.addEventListener("DOMContentLoaded", (event) => {
+			document.body.addEventListener('htmx:beforeSwap', function (evt) {
+				if (evt.detail.xhr.status === 422 || evt.detail.xhr.status === 500) {
+					console.log("setting status to paint");
+					// allow 422 responses to swap as we are using this as a signal that
+					// a form was submitted with bad data and want to rerender with the
+					// errors
+					//
+					// set isError to false to avoid error logging in console
+					evt.detail.shouldSwap = true;
+					evt.detail.isError = false;
+				}
+			});
+		});
+	</script>
+
+	<script>
+		function setupNotifications(vapidPublicKey, serviceworkerPath) {
+			let wakeLock = null;
+
+			// Register Service Worker
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register(serviceworkerPath, { scope: '/' })
+					.then(function (reg) {
+						console.log('Service Worker registered successfully.');
+						if (document.getElementById('push-subscribe-button')) {
+							document.getElementById('push-subscribe-button').addEventListener('click', function () {
+								console.log("subscribe button pusshed")
+								if ('serviceWorker' in navigator && 'PushManager' in window) {
+									Notification.requestPermission().then(function (permission) {
+										if (permission === 'granted') {
+											console.log("going to subscribe")
+											reg.pushManager.subscribe({
+												userVisibleOnly: true,
+												applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+											}).then(function (subscription) {
+												console.log("Posting to /push/subscribe")
+												fetch('/push/subscribe', {
+													method: 'POST',
+													headers: {
+														'Content-Type': 'application/json'
+													},
+													body: JSON.stringify(subscription)
+												});
+											}).then(function (resp) {
+												alert("Subscribed!")
+												document.getElementById('push-subscribe-button').remove()
+											}).catch(function (err) {
+												console.error('Failed to subscribe to push notifications:', err);
+											});
+										} else {
+											console.log("Permission not granted for notifications");
+										}
+									});
+								} else {
+									console.log("Missing deps")
+								}
+							});
+						}
+					})
+					.catch(err => console.error('Service Worker registration failed:', err));
+			}
+		}
+
+		function urlBase64ToUint8Array(base64String) {
+			const padding = '='.repeat((4 - base64String.length % 4) % 4);
+			const base64 = (base64String + padding)
+				.replace(/\-/g, '+')
+				.replace(/_/g, '/');
+
+			const rawData = window.atob(base64);
+			const outputArray = new Uint8Array(rawData.length);
+
+			for (let i = 0; i < rawData.length; ++i) {
+				outputArray[i] = rawData.charCodeAt(i);
+			}
+			return outputArray;
+		}
+	</script>
+	@templ.JSFuncCall("setupNotifications", cfg.VapidPublicKey, versionedPath("/serviceWorker.js"))
+</body>
+
+</html>
+}
