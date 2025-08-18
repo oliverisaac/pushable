@@ -23,6 +23,16 @@ self.addEventListener('notificationclick', function(event) {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      if (event.notification.data.link === undefined ) {
+        return
+      }
+
+      const paramsData = {
+        target: event.notification.data.link,
+      };
+
+      const params = new URLSearchParams(paramsData);
+      const redirectURL = "/redirect?" + params.toString();
       if (clientList.length > 0) {
         let client = clientList[0];
         for (let i = 0; i < clientList.length; i++) {
@@ -30,10 +40,10 @@ self.addEventListener('notificationclick', function(event) {
             client = clientList[i];
           }
         }
-        client.navigate(event.notification.data.url);
+        client.navigate(redirectURL);
         return client.focus();
       }
-      return clients.openWindow(event.notification.data.url);
+      return clients.openWindow(redirectURL);
     })
   );
 });

@@ -146,6 +146,7 @@ func run() error {
 	e.POST("/push/subscribe", saveSubscription(db))
 	e.POST("/push/unsubscribe", removeSubscription(db))
 	e.POST("/push", pushNotification(cfg, db))
+	e.GET("/redirect", redirect())
 
 	return e.Start(":8080")
 }
@@ -175,4 +176,11 @@ func GetSessionUser(c echo.Context) (types.User, bool) {
 		return user, true
 	}
 	return types.User{}, false
+}
+
+func redirect() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		target := c.FormValue("target")
+		return c.Redirect(http.StatusFound, target)
+	}
 }
