@@ -10,12 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func SendPush(endpoint string, push Push) error {
-	endpointURL, err := url.Parse(endpoint)
-	if err != nil {
-		return errors.Wrap(err, "Parsing push endpoint")
-	}
-
+func SendPush(endpointHostname string, push Push) error {
 	formData := url.Values{}
 	formData.Set("topic", push.Topic)
 	formData.Set("title", push.Title)
@@ -23,12 +18,8 @@ func SendPush(endpoint string, push Push) error {
 	formData.Set("icon", push.Icon)
 	formData.Set("link", push.Link)
 
-	endpointURL.Path = "/push"
-	if endpointURL.Scheme == "" {
-		endpointURL.Scheme = "https"
-	}
-
-	resp, err := http.Post(endpointURL.String(), "application/x-www-form-urlencoded", strings.NewReader(formData.Encode()))
+	endpoint := fmt.Sprintf("https://%s/push", endpointHostname)
+	resp, err := http.Post(endpoint, "application/x-www-form-urlencoded", strings.NewReader(formData.Encode()))
 	if err != nil {
 		return err
 	}
