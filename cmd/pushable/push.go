@@ -8,6 +8,7 @@ import (
 
 	webpush "github.com/SherClockHolmes/webpush-go"
 	"github.com/labstack/echo/v4"
+	"github.com/oliverisaac/pushable/lib/pushclient"
 	"github.com/oliverisaac/pushable/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -64,7 +65,7 @@ func saveSubscription(db *gorm.DB) echo.HandlerFunc {
 
 func pushNotification(cfg types.Config, db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		push := types.Push{
+		push := pushclient.Push{
 			Topic: c.FormValue("topic"),
 			Title: c.FormValue("title"),
 			Body:  c.FormValue("body"),
