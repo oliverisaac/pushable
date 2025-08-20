@@ -37,7 +37,7 @@ RUN templ generate
 COPY cmd ./cmd
 COPY types ./types
 COPY version ./version
-COPY version ./version
+COPY lib ./lib
 
 COPY --from=tailwind /workdir/static/css/style.min.css ./static/css/style.min.css
 
