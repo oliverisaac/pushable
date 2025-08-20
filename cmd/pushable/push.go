@@ -64,11 +64,13 @@ func saveSubscription(db *gorm.DB) echo.HandlerFunc {
 
 func pushNotification(cfg types.Config, db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		topic := c.FormValue("topic")
-		title := c.FormValue("title")
-		body := c.FormValue("body")
-		icon := c.FormValue("icon")
-		link := c.FormValue("link")
+		push := types.Push{
+			Topic: c.FormValue("topic"),
+			Title: c.FormValue("title"),
+			Body:  c.FormValue("body"),
+			Icon:  c.FormValue("icon"),
+			Link:  c.FormValue("link"),
+		}
 
 		var users []types.User
 		if err := db.Preload("PushSubscriptions").Find(&users).Error; err != nil {
@@ -76,8 +78,8 @@ func pushNotification(cfg types.Config, db *gorm.DB) echo.HandlerFunc {
 		}
 
 		for _, i := range []string{"fail", "success", "good", "bad", "neutral", "mid"} {
-			if strings.HasPrefix(strings.ToLower(icon), i) {
-				icon = fmt.Sprintf("https://%s/static/%s.png", cfg.Hostname, i)
+			if strings.HasPrefix(strings.ToLower(push.Icon), i) {
+				push.Icon = fmt.Sprintf("https://%s/static/%s.png", cfg.Hostname, i)
 			}
 		}
 
@@ -92,11 +94,11 @@ func pushNotification(cfg types.Config, db *gorm.DB) echo.HandlerFunc {
 				}
 
 				pushPayload, err := json.Marshal(map[string]interface{}{
-					"title": title,
-					"body":  body,
-					"icon":  icon,
+					"title": push.Title,
+					"body":  push.Body,
+					"icon":  push.Icon,
 					"data": map[string]string{
-						"link": link,
+						"link": push.Link,
 					},
 				})
 				if err != nil {
@@ -104,7 +106,7 @@ func pushNotification(cfg types.Config, db *gorm.DB) echo.HandlerFunc {
 				}
 
 				resp, err := webpush.SendNotification(pushPayload, sub, &webpush.Options{
-					Topic:           topic,
+					Topic:           push.Topic,
 					VAPIDPublicKey:  cfg.VapidPublicKey,
 					VAPIDPrivateKey: cfg.VapidPrivateKey,
 					TTL:             3600,
