@@ -5,5 +5,6 @@ type Push struct {
 	Title string
 	Body  string
 	Icon  string
+	Badge string
 	Link  string
 }

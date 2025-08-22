@@ -71,6 +71,7 @@ func pushNotification(cfg types.Config, db *gorm.DB) echo.HandlerFunc {
 			Body:  c.FormValue("body"),
 			Icon:  c.FormValue("icon"),
 			Link:  c.FormValue("link"),
+			Badge: c.FormValue("badge"),
 		}
 
 		var users []types.User
@@ -98,6 +99,7 @@ func pushNotification(cfg types.Config, db *gorm.DB) echo.HandlerFunc {
 					"title": push.Title,
 					"body":  push.Body,
 					"icon":  push.Icon,
+					"badge": push.Badge,
 					"data": map[string]string{
 						"link": push.Link,
 					},

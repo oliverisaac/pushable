@@ -17,6 +17,7 @@ func SendPush(endpointHostname string, push Push) error {
 	formData.Set("body", push.Body)
 	formData.Set("icon", push.Icon)
 	formData.Set("link", push.Link)
+	formData.Set("badge", push.Badge)
 
 	endpoint := fmt.Sprintf("https://%s/push", endpointHostname)
 	resp, err := http.Post(endpoint, "application/x-www-form-urlencoded", strings.NewReader(formData.Encode()))
